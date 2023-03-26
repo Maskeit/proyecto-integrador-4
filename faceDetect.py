@@ -2,7 +2,7 @@ import cv2
 import numpy
 
 filename= 'img3.jpg'
-
+#comentario de prueba
 
 def detect(filename):
     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
