@@ -3,11 +3,38 @@ import argparse
 import numpy as np
 from ultralytics import YOLO
 import supervision as sv
+
+import threading
+import time
+import socket
+
+def create_connection(host="localhost", port=8000):
+    # Crea un socket y se conecta al servidor en el host y puerto especificados
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((host, port))
+    return sock
+
+# Función que se encarga de enviar los datos cada cierto tiempo
+def send_data(connection, data,detections):
+    while True:
+        connection.send(data)
+        time.sleep(10)  # Envía los datos cada 10 segundos
+
+# En el programa principal
+if __name__ == "__main__":
+    # Crea la conexión con el otro archivo
+    connection = create_connection()  # Asume que ya tienes una función que crea la conexión
+    # Crea un hilo que se encargue de enviar los datos cada cierto tiempo
+    data_to_send = len(detections)  # Aquí debes guardar la longitud de personas detectadas
+    send_thread = threading.Thread(target=send_data, args=(connection, data_to_send))
+    send_thread.start()
+
+##aqui se detiene un poco
 ZONE_POLYGON = np.array([
     [0,0],
-    [640,0], #left side
-    [640 , 352],
-    [0,352]#right side
+    [800,0], #left side
+    [800 , 608],
+    [0,608]#right side
 ])
 def parse_arguments() ->argparse.Namespace:
     parser = argparse.ArgumentParser(description="YYOLOv8live")
@@ -23,14 +50,14 @@ def parse_arguments() ->argparse.Namespace:
 
 def main():
     args = parse_arguments()
-    cap = cv2.VideoCapture('video1.mp4') #web cam en (720, 1280, 3) y #img en (352, 640, 3)
+    cap = cv2.VideoCapture(1) #web cam en (720, 1280, 3) y #img en (352, 640, 3)
 
     frame_width, frame_height = args.webcam_resolution
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,frame_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 
-    model = YOLO("yolov8l.pt")
+    model = YOLO("best.pt") #yolov8l
 
     box_annotator = sv.BoxAnnotator(thickness=2,text_thickness=2,text_scale=1)
     #
