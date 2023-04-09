@@ -4,30 +4,7 @@ import numpy as np
 from ultralytics import YOLO
 import supervision as sv
 
-import threading
-import time
 import socket
-
-def create_connection(host="localhost", port=8000):
-    # Crea un socket y se conecta al servidor en el host y puerto especificados
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((host, port))
-    return sock
-
-# Función que se encarga de enviar los datos cada cierto tiempo
-def send_data(connection, data,detections):
-    while True:
-        connection.send(data)
-        time.sleep(10)  # Envía los datos cada 10 segundos
-
-# En el programa principal
-if __name__ == "__main__":
-    # Crea la conexión con el otro archivo
-    connection = create_connection()  # Asume que ya tienes una función que crea la conexión
-    # Crea un hilo que se encargue de enviar los datos cada cierto tiempo
-    data_to_send = len(detections)  # Aquí debes guardar la longitud de personas detectadas
-    send_thread = threading.Thread(target=send_data, args=(connection, data_to_send))
-    send_thread.start()
 
 ##aqui se detiene un poco
 ZONE_POLYGON = np.array([
@@ -50,14 +27,14 @@ def parse_arguments() ->argparse.Namespace:
 
 def main():
     args = parse_arguments()
-    cap = cv2.VideoCapture(1) #web cam en (720, 1280, 3) y #img en (352, 640, 3)
+    cap = cv2.VideoCapture('video.mp4') #web cam en (720, 1280, 3) y #img en (352, 640, 3)
 
     frame_width, frame_height = args.webcam_resolution
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,frame_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 
-    model = YOLO("best.pt") #yolov8l
+    model = YOLO("best.pt") #yolov8l modelo prentrenado por miguel
 
     box_annotator = sv.BoxAnnotator(thickness=2,text_thickness=2,text_scale=1)
     #
@@ -68,7 +45,6 @@ def main():
                                              text_thickness=4,
                                              text_scale=2
                                             )
-    #
 
     while True:
         success, frame = cap.read()
@@ -93,6 +69,8 @@ def main():
             num_personas = len(detections)
             print(f"Se detectaron {num_personas} personas")
 
+
+
         cv2.imshow("yolov8", frame)
         # print(frame.shape)
         # break
@@ -102,3 +80,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+#creamos el objeto de conexion para el servidor
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((socket.gethostname(), 5000))
+s.listen(5)
+# creamos el objeto de conexion para el servidor
+clienSocket, address = s.accept()
+print(f"La conexion desde {address} ha sido establecida!")
+clienSocket.send(bytes(len(detections)))
