@@ -1,104 +1,55 @@
+import torch
 import cv2
-import argparse
 import numpy as np
-from ultralytics import YOLO
-import supervision as sv
 
-import threading
-import time
+#Bloque para la funcion de enviar el dato a otro archivo
 import socket
 
-def create_connection(host="localhost", port=8000):
-    # Crea un socket y se conecta al servidor en el host y puerto especificados
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((host, port))
-    return sock
+def enviarData(num_persona):
+    # Crear socket y conectar con el servidor
+    HOST = 'localhost'  # Host del servidor
+    PORT = 12345  # Puerto utilizado por el servidor
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((HOST, PORT))
+        # Enviar el número de personas detectadas como una cadena de texto
+        s.sendall(str(num_persona).encode())
+        # Esperar respuesta del servidor (opcional)
+        data = s.recv(1024)
+        print(f"Respuesta del servidor: {data.decode()}")
+#
 
-# Función que se encarga de enviar los datos cada cierto tiempo
-def send_data(connection, data,detections):
-    while True:
-        connection.send(data)
-        time.sleep(10)  # Envía los datos cada 10 segundos
+#leemos el modelo
+model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'C:/Users/migue/Desktop/yolo/yolo/YoloV5/bestv5.pt' )
 
-# En el programa principal
-if __name__ == "__main__":
-    # Crea la conexión con el otro archivo
-    connection = create_connection()  # Asume que ya tienes una función que crea la conexión
-    # Crea un hilo que se encargue de enviar los datos cada cierto tiempo
-    data_to_send = len(detections)  # Aquí debes guardar la longitud de personas detectadas
-    send_thread = threading.Thread(target=send_data, args=(connection, data_to_send))
-    send_thread.start()
+cap = cv2.VideoCapture('video1.mp4')
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+# Aumentar el brillo multiplicando los valores de los pixeles
+print('Dispositivo de ejecución:', torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
-##aqui se detiene un poco
-ZONE_POLYGON = np.array([
-    [0,0],
-    [800,0], #left side
-    [800 , 608],
-    [0,608]#right side
-])
-def parse_arguments() ->argparse.Namespace:
-    parser = argparse.ArgumentParser(description="YYOLOv8live")
-    parser.add_argument(
-        "--webcam-resolution",
-        default=[640,352], #1280, 720
-        nargs=2,
-        type=int
-    )
-    args = parser.parse_args()
-    return args
+while True:
+    success, frame = cap.read()
+    brillo = 70
+    frame = cv2.convertScaleAbs(frame, beta=brillo)
+    # Realizar detecciones
+    detect = model(frame)
+    #contar el numero de personas detectadas
+    num_persona = 0
+    for det in detect.xyxy[0]:
+        if det[5] == 0:
+            num_persona +=1
 
+    #mostramos fps
+    cv2.imshow('detector de personas', np.squeeze(detect.render()))
+    # print(frame.shape) (480, 640, 3)
+    # leer el teclado
+    t = cv2.waitKey(5000)
+    if t != ord('p'):
+        print(f"se detectaron {num_persona} personas")
+        enviarData(num_persona)
 
-def main():
-    args = parse_arguments()
-    cap = cv2.VideoCapture(1) #web cam en (720, 1280, 3) y #img en (352, 640, 3)
+    if t == 27:
+        break
 
-    frame_width, frame_height = args.webcam_resolution
-
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,frame_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-
-    model = YOLO("best.pt") #yolov8l
-
-    box_annotator = sv.BoxAnnotator(thickness=2,text_thickness=2,text_scale=1)
-    #
-    zone = sv.PolygonZone(polygon=ZONE_POLYGON,frame_resolution_wh=tuple(args.webcam_resolution))
-    zone_annotator = sv.PolygonZoneAnnotator(zone=zone,
-                                             color=sv.Color.white(),
-                                             thickness=2,
-                                             text_thickness=4,
-                                             text_scale=2
-                                            )
-    #
-
-    while True:
-        success, frame = cap.read()
-        # frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
-
-        result = model(frame)[0]
-        detections = sv.Detections.from_yolov8(result)
-        detections = detections[detections.class_id == 0] #para descartar los demas objetos hay que cambiar el valor de la class_id == 0
-
-
-        labels =  [
-            f"{model.model.names[class_id]} {confidence:0.5f}"
-            for _, confidence, class_id, _ in detections
-        ]
-        frame = box_annotator.annotate(scene=frame,
-                                       detections=detections,
-                                       labels=labels
-                                       )
-        zone.trigger(detections=detections)
-        frame = zone_annotator.annotate(scene=frame)
-        if cv2.waitKey(1) == ord('p'):
-            num_personas = len(detections)
-            print(f"Se detectaron {num_personas} personas")
-
-        cv2.imshow("yolov8", frame)
-        # print(frame.shape)
-        # break
-        if(cv2.waitKey(1) == 27):
-            break
-    pass
-
-if __name__ == "__main__":
-    main()
+cap.release()
+cv2.destroyAllWindows()
