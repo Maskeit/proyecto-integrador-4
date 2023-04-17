@@ -3,26 +3,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import datetime
-
-def send_email(subject, body):
-    sender_email = "miguelagustin182@gmail.com"  # Replace with your email address
-    receiver_email = "malejandre@ucol.mx"  # Replace with recipient email address
-    password = "contrasena_ejem"  # Replace with your email password
-
-    message = MIMEMultipart()
-    message["Subject"] = subject
-    message["From"] = sender_email
-    message["To"] = receiver_email
-
-    # Add body to email
-    message.attach(MIMEText(body, "plain"))
-
-    # Create secure connection with server and send email
-    context = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-    context.login(sender_email, password)
-    context.sendmail(sender_email, receiver_email, message.as_string())
-    context.quit()
-
 def getData():
     # crea un objeto socket
     s = socket.socket()
@@ -50,4 +30,3 @@ while True:
     except Exception as e:
         error_msg = f"Se produjo un error en el servidor: {e}"
         print(error_msg)
-        send_email("error en el servidor", "Reparar urgentemente o reconectar servidor")
