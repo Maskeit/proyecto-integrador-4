@@ -3,12 +3,13 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import datetime
+
 def getData():
     # crea un objeto socket
     s = socket.socket()
     # especifica la dirección IP y el puerto en los que el servidor va a escuchar
     host = 'localhost'
-    port = 12345
+    port = 18748
     # enlazar el socket al servidor
     s.bind((host, port))
     # escucha conexiones entrantes
@@ -25,8 +26,9 @@ def getData():
 
 # llama a la función getData para recibir los datos
 while True:
-    try:
-        getData()
-    except Exception as e:
-        error_msg = f"Se produjo un error en el servidor: {e}"
-        print(error_msg)
+    #try:
+    getData()
+    # except Exception as e:
+    #     error_msg = f"Se produjo un error en el servidor: {e}"
+    #     print(error_msg)
+    #     send_email("error en el servidor", "Reparar urgentemente o reconectar servidor")
