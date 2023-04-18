@@ -1,6 +1,8 @@
 import torch
 import cv2
 import numpy as np
+import time
+#Bloque para la funcion de enviar el dato a otro archivo
 import socket
 import psycopg2
 
@@ -40,34 +42,37 @@ def enviarData(num_persona):
 model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'C:/Users/ximen/PycharmProjects/pythonProject/proyectoOpenCV/yolo/proyecto-integrador-4/algoritmo/bestv5.pt' )
 
 cap = cv2.VideoCapture(1)
+
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 # Aumentar el brillo multiplicando los valores de los pixeles
 print('Dispositivo de ejecución:', torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 
+# Variables para el control del tiempo de detección
+last_detection_time = 0
+detection_interval = 4 # segundos
+
 while True:
     success, frame = cap.read()
-    brillo = 70
-    frame = cv2.convertScaleAbs(frame, beta=brillo)
-    # Realizar detecciones
-    detect = model(frame)
-    #contar el numero de personas detectadas
-    num_persona = 0
-    for det in detect.xyxy[0]:
-        if det[5] == 0:
-            num_persona +=1
-
-    #mostramos fps
-    cv2.imshow('detector de personas', np.squeeze(detect.render()))
-    # print(frame.shape) (480, 640, 3)
+    # Realizar detecciones si han pasado al menos detection_interval segundos desde la última detección
+    current_time = time.time()
+    if success and current_time - last_detection_time >= detection_interval:
+        brillo = 40
+        frame = cv2.convertScaleAbs(frame, beta=brillo)
+        detect = model(frame)
+        num_persona = 0
+        for det in detect.xyxy[0]:
+            if det[5] == 0:
+                num_persona +=1
+        cv2.imshow('detector de personas', np.squeeze(detect.render()))
+        last_detection_time = current_time # Actualizar el tiempo de la última detección
+        print(f"Se detectaron {num_persona} personas")
+        if num_persona:
+            enviarData(num_persona)
+        else:
+            break
     # leer el teclado
-    t = cv2.waitKey(5000)
-    if t != ord('p'):
-        print(f"se detectaron {num_persona} personas")
-        enviarData(num_persona)
-
-    if t == 27:
-        break
+    cv2.waitKey(1)
 
 cap.release()
 cv2.destroyAllWindows()
