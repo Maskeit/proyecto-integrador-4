@@ -19,16 +19,21 @@ def enviarData(num_persona):
     cursor = conn.cursor()
     # Insertar los valores en la tabla
     #consulta = f"INSERT INTO nombre_tabla (columna_resultado) VALUES ({operacion})"
-    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (6, 2, num_persona))
+    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (8, 4, num_persona))
+    #(6, 2, num_persona) 6 = casa Miguel && 2 = camara desktop MIguel
+    #(8, 4, num_persona) 8 = salon 4D && 4 = camara Laptop Miguel
+    #(8, 5, num_persona) 8 = salon 4D && 5 = raspberry
+    #(6, 6, num_persona) 6 = casa Miguel 4D && 6 = raspberry
+
     conn.commit()
     # Cerrar la conexión
     conn.close()
 #
 
 #leemos el modelo
-model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'C:/Users/migue/Desktop/yolo/yolo/YoloV5/bestv5.pt' )
+model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'models/bestv5.pt' )
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 # Variables para el control del tiempo de detección
