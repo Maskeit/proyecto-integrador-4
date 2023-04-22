@@ -38,7 +38,7 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 # Variables para el control del tiempo de detección
 last_detection_time = 0
-detection_interval = 2 # segundos
+detection_interval = 5 # segundos
 
 while True:
     success, frame = cap.read()
@@ -52,7 +52,7 @@ while True:
         for det in detect.xyxy[0]:
             if det[5] == 0:
                 num_persona +=1
-#        cv2.imshow('detector de personas', np.squeeze(detect.render()))
+        cv2.imshow('detector de personas', np.squeeze(detect.render()))
         last_detection_time = current_time # Actualizar el tiempo de la última detección
         print(f"Se detectaron {num_persona} personas")
         if num_persona != 0:
