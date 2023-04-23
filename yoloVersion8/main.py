@@ -22,7 +22,7 @@ def enviarData(num_persona):
     cursor = conn.cursor()
     # Insertar los valores en la tabla
     #consulta = f"INSERT INTO nombre_tabla (columna_resultado) VALUES ({operacion})"
-    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (8, 4, num_persona))
+    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (6, 6, num_persona))
     #(6, 2, num_persona) 6 = casa Miguel && 2 = camara desktop MIguel
     #(8, 4, num_persona) 8 = salon 4D && 4 = camara Laptop Miguel
     #(8, 5, num_persona) 8 = salon 4D && 5 = raspberry
@@ -34,7 +34,7 @@ def parse_arguments() ->argparse.Namespace:
     parser = argparse.ArgumentParser(description="YOLOv8live")
     parser.add_argument(
         "--webcam-resolution",
-        default=[1280,720],
+        default=[640,480],
         nargs=2,
         type=int
     )
@@ -44,13 +44,13 @@ def parse_arguments() ->argparse.Namespace:
 
 def main():
     args = parse_arguments()
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
     frame_width, frame_height = args.webcam_resolution
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,frame_width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
 
-    model = YOLO("models/yolov8l.pt") #modelo prentrenado del repo de ultralytics
+    model = YOLO("yolov8l.pt") #modelo prentrenado del repo de ultralytics
 
     box_annotator = sv.BoxAnnotator(thickness=2,text_thickness=2,text_scale=1)
 
