@@ -44,7 +44,7 @@ def parse_arguments() ->argparse.Namespace:
 
 def main():
     args = parse_arguments()
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
     frame_width, frame_height = args.webcam_resolution
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,frame_width)
@@ -81,10 +81,12 @@ def main():
             last_detection_time = current_time
             cv2.imshow("yolov8", frame)
             print(num_persona)
-            if num_persona != 0:
+            """
+          if num_persona != 0:
                 enviarData(num_persona)
             else:
                 print("No hay datos para enviar")
+            """
             if (cv2.waitKey(1) == 27):
                 break
     pass
