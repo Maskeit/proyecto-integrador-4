@@ -52,7 +52,8 @@ def main():
 
     model = YOLO("yolov8l.pt") #modelo prentrenado del repo de ultralytics
 
-    box_annotator = sv.BoxAnnotator(thickness=2,text_thickness=2,text_scale=1)
+    box_annotator = sv.BoxAnnotator(thickness=2,text_thickness=2,
+                                    text_scale=1)
 
     # Variables para el control del tiempo de detección
     last_detection_time = 0
@@ -80,13 +81,13 @@ def main():
             num_persona = len(detections)
             last_detection_time = current_time
             cv2.imshow("yolov8", frame)
-            print(num_persona)
-            """
-          if num_persona != 0:
+
+            if num_persona != 0:
+                print(f"Se han detectado {num_persona} personas")
                 enviarData(num_persona)
+                print("Esperando Deteccion...")
             else:
                 print("No hay datos para enviar")
-            """
             if (cv2.waitKey(1) == 27):
                 break
     pass

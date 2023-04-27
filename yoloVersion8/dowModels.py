@@ -1,3 +1,3 @@
 from ultralytics import YOLO
 
-model = YOLO("yolov5I6.pt")
+model = YOLO("yolov8l.pt")
