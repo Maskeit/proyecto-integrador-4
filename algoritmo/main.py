@@ -9,9 +9,9 @@ import psycopg2
 def enviarData(num_persona):
     # Conectar la base de datos
     conn = psycopg2.connect(
-        host="smart-crowd.postgres.database.azure.com",
-        database="smart-crowd",
-        user="django@smart-crowd",
+        host="smartcrowd.postgres.database.azure.com",
+        database="smartcrowd",
+        user="django@smartcrowd",
         password="MAdj2023!*",
         sslmode="require"
     )
@@ -20,7 +20,10 @@ def enviarData(num_persona):
     cursor = conn.cursor()
     # Insertar los valores en la tabla
     #consulta = f"INSERT INTO nombre_tabla (columna_resultado) VALUES ({operacion})"
-    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (8, 1, num_persona))
+    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (4, 3, num_persona))
+    # Salon: 2,1
+    # Cafeteria: 3,2
+    # Casa Miguel: 4,3
     conn.commit()
     # Cerrar la conexión
     conn.close()
