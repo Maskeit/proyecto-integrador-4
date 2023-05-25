@@ -19,14 +19,10 @@ def enviarData(num_persona):
     cursor = conn.cursor()
     # Insertar los valores en la tabla
     #consulta = f"INSERT INTO nombre_tabla (columna_resultado) VALUES ({operacion})"
-<<<<<<< HEAD
     cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (4, 3, num_persona))
     # Salon: 2,1
     # Cafeteria: 3,2
     # Casa Miguel: 4,3
-=======
-    cursor.execute("INSERT INTO public.\"aforoReg_register\" (id_place, id_cam, personas) VALUES (%s, %s, %s)", (6, 2, num_persona))
->>>>>>> 93489ccef68524c266d71a21189e1f7040e70bc6
     conn.commit()
     # Cerrar la conexión
     conn.close()
